@@ -1,12 +1,12 @@
+import express, {Request,Response} from "express";
+import connect from "./db/db";
+connect();
 
-
-
-import express from "express";
 const app =express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
-app.get('/',(req,res)=>{
+app.get('/',(req:Request,res:Response)=>{
     res.send('Hello World');
 });
 
