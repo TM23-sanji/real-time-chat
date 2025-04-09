@@ -51,7 +51,8 @@ const loginUserController = async (req: Request<{}, {}, UserData>, res: Response
 }
 
 const profileController= async (req:Request,res:Response):Promise<void>=>{
-    
+    const user = req.user;
+    res.status(200).json({user});
 }
 
 export default { createUserController, loginUserController, profileController };
