@@ -3,6 +3,7 @@ import userServices from "../services/user.service";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { UserData } from "../types/register.types";
+import redisClient from "../services/redis.service";
 
 const createUserController = async (req: Request<{}, {}, UserData>, res: Response):Promise<void> => {
     const errors = validationResult(req);
@@ -55,4 +56,19 @@ const profileController= async (req:Request,res:Response):Promise<void>=>{
     res.status(200).json({user});
 }
 
-export default { createUserController, loginUserController, profileController };
+const logoutController = async (req:Request,res:Response):Promise<void>=>{
+    try {
+        const token= await req.headers.authorization?.split(' ')[1] || req.cookies.token;
+        if(!token){
+            res.status(400).send("Token not found");
+            return;
+        }
+        await redisClient.set(token,'logout', 'EX', 60 * 60 * 24);
+        res.status(200).send("Logged out successfully");
+    }
+    catch (err){
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+export default { createUserController, loginUserController, profileController, logoutController };
