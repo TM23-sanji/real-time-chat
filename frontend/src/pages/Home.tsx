@@ -1,10 +1,13 @@
 import React  from 'react'
-import { useUserContext } from '../context/use.user.context'
+// import { useUserContext } from '../context/use.user.context'
+import AddProjectModal from '../components/AddProjectModal';
 
 const Home:React.FC = () => {
-  const {user}=useUserContext();
+  // const {user}=useUserContext();
   return (
-    <div className='font-bold'>{user ? user.name : 'Guest'}</div>
+    <div><h1>My Dashboard</h1>
+    <AddProjectModal />
+</div>
   )
 }
 

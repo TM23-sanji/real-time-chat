@@ -6,7 +6,7 @@ export interface IProject extends Document {
 }
 
 const projectSchema:Schema = new Schema({
-    name:{type:String, lowercase:true, required:[true, 'Name is required'], unique:true, trim:true},
+    name:{type:String, lowercase:true, required:[true, 'Name is required'], unique:[true,'Project Name must be Unique'], trim:true},
     users:[{
         type:Schema.Types.ObjectId,
         ref:'user'

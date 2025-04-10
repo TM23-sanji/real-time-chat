@@ -3,10 +3,14 @@ import { ProjectData } from "../types/register.types";
 
 const createProject = async ({ name, userId }: ProjectData) => {
     if (!name || !userId) {
-        throw new Error("All fields are required");
+        throw new Error("Name and userId are required");
     }
-    const project = await projectModel.create({ name, users: [userId] });
-    return project;
+    try {
+        const project = await projectModel.create({ name, users: [userId] });
+        return project;
+    } catch (error) {
+        throw error;
+    }
 }
 
 export default {createProject};
