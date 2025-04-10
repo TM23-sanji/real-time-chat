@@ -40,8 +40,8 @@ const Signup = () => {
     setLoading(true);
     try {
       const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,data);
-        console.log("Success:", response.data);
-        navigate('/')
+      console.log("Success:", response.data);
+      navigate('/')
     } catch (error){
       console.error("Signup failed:", error);
       toast.error("Signup failed. Please try again.");

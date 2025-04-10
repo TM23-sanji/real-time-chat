@@ -14,7 +14,10 @@ const createUserController = async (req: Request<{}, {}, UserData>, res: Respons
     try {
         const user = await userServices.createUser({ name, email, password });
         const token = await user.generateJWT();
-        res.status(201).json({ user, token });
+        const userObject = user.toObject();
+        delete (userObject as Partial<IUser>).password;
+        res.status(201).json({ user:userObject, token });
+        return
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).send(error.message);
@@ -39,9 +42,13 @@ const loginUserController = async (req: Request<{}, {}, UserData>, res: Response
         const isValidPassword=await user.isValidPassword(password);
         if (!isValidPassword){
             res.status(400).send("Invalid password");
+            return;
         }
         const token = await user.generateJWT();
-        res.status(200).json({ user, token });
+        const userObject = user.toObject();
+        delete (userObject as Partial<IUser>).password;
+        res.status(200).json({ user:userObject, token });
+        return 
     } catch(error){
         if (error instanceof Error) {
             res.status(400).send(error.message);

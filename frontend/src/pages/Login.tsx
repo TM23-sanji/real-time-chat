@@ -2,6 +2,8 @@ import { useState } from 'react';
 import {  Box,  Paper,  TextField,  Button,  Typography,IconButton,  CircularProgress,  InputAdornment,} from '@mui/material';
 import { useForm } from 'react-hook-form';
 import {useNavigate} from 'react-router-dom';
+import {toast} from "react-hot-toast";
+import axios from 'axios';
 
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
@@ -24,12 +26,19 @@ const Login = () => {
     setShowPassword(prev=> !prev)
    }
 
-  const onSubmit = (data: LoginFormInputs) => {
+  const onSubmit = async (data: LoginFormInputs) => {
     console.log("Login Data:", data);
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);navigate('/')
-    }, 2000); // Simulate API
+        try {
+          const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,data);
+          console.log("Success:", response.data);
+          navigate('/')
+        } catch (error){
+          console.error("Signup failed:", error);
+          toast.error("Signup failed. Please try again.");
+        } finally {
+          setLoading(false);
+        }
   };
 
   return (
