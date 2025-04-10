@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import {useNavigate} from 'react-router-dom';
 import {toast} from "react-hot-toast";
 import axios from 'axios';
+import { useUserContext } from '../context/use.user.context';
 
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
@@ -17,6 +18,8 @@ interface LoginFormInputs {
 }
 
 const Login = () => {
+  const {setUser}=useUserContext();
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
   const [loading, setLoading] = useState(false);
    const [showPassword, setShowPassword] = useState(false);
@@ -32,10 +35,12 @@ const Login = () => {
         try {
           const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,data);
           console.log("Success:", response.data);
+          localStorage.setItem('token',response.data.token);
+          setUser(response.data.user);
           navigate('/')
         } catch (error){
-          console.error("Signup failed:", error);
-          toast.error("Signup failed. Please try again.");
+          console.error("Login failed:", error);
+          toast.error("Login failed. Please try again.");
         } finally {
           setLoading(false);
         }

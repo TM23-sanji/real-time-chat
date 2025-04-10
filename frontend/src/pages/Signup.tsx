@@ -18,6 +18,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import {toast} from "react-hot-toast";
+import { useUserContext } from '../context/use.user.context';
 
 interface SignupFormInputs {
   name: string;
@@ -26,6 +27,7 @@ interface SignupFormInputs {
 }
 
 const Signup = () => {
+  const {setUser}=useUserContext();
   const { register, handleSubmit, formState: { errors } } = useForm<SignupFormInputs>();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,6 +43,8 @@ const Signup = () => {
     try {
       const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,data);
       console.log("Success:", response.data);
+      localStorage.setItem('token',response.data.token);
+      setUser(response.data.user);
       navigate('/')
     } catch (error){
       console.error("Signup failed:", error);
