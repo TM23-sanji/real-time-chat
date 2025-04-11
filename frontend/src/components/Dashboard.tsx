@@ -12,6 +12,9 @@ import {
 import React, { useState } from 'react';
 import AddProjectModal from './AddProjectModal';
 import ChatLayout from './ChatLayout';
+import axios from "axios";
+import { useUserContext } from '../context/use.user.context';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState<string[]>([]);
@@ -27,6 +30,8 @@ const Dashboard = () => {
   const handleAddProject = (name: string) => {
     setProjects((prev) => [...prev, name || 'Project Inc']);
   };
+  const {setUser} = useUserContext();
+  const navigate = useNavigate();
 
   return (
     <Box>
@@ -44,7 +49,20 @@ const Dashboard = () => {
             open={openMenu}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={() => alert('Logout clicked!')}>
+            <MenuItem onClick={async () => {
+              try {
+              const response = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/users/logout`,{},{headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}} );
+              if (response.status === 200){
+                console.log('Logout successful', response.data)
+              localStorage.removeItem("token");  
+              setUser(null);
+              navigate('/login')
+              }
+            } catch (error){
+                console.log('Logout error', error)
+              }
+            }}>
               Logout
             </MenuItem>
           </Menu>
@@ -53,7 +71,7 @@ const Dashboard = () => {
 
       {/* Project List */}
       {!selectedProject ? (
-        <Grid container spacing={2} px={4}>
+        <Grid container spacing={2} px={4} >
           {projects.map((project, index) => (
             <Grid key={index} sx={{
               gridColumn: {
