@@ -45,7 +45,6 @@ const addUserToProjectController = async (req: Request, res: Response):Promise<v
 
     try {
         const {projectId,users}=req.body;
-        const userId= req.user?.id;
         if (!projectId || !users) {
             res.status(400).json({error: "ProjectId and users are required"});
             return;

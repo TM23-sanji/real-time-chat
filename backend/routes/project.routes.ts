@@ -12,6 +12,7 @@ router.post('/create',
 );
 
 router.get('/all',authMiddleware.authUser,projectController.getAllProjectController);
+
 router.put('/add-user',authMiddleware.authUser,
     body('projectId').isString().withMessage('ProjectId is required').bail(),
     body('users').isArray({min:1}).withMessage('Users must be an array of at least 1 user').bail()

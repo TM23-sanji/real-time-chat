@@ -78,4 +78,15 @@ const logoutController = async (req:Request,res:Response):Promise<void>=>{
     }
 }
 
-export default { createUserController, loginUserController, profileController, logoutController };
+const getAllUsersController=async (req:Request,res:Response):Promise<void>=>{
+    try {
+        const userId=req.user?.id;
+        const users = await userModel.find({_id:{$ne:userId}});//exclude the current user from the list.
+        res.status(200).json(users);
+    }
+    catch (err){
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+export default { createUserController, loginUserController, profileController, logoutController, getAllUsersController };
