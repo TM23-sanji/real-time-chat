@@ -65,4 +65,18 @@ const addUserToProjectController = async (req: Request, res: Response):Promise<v
     }
 }
 
-export default {createProjectController, getAllProjectController, addUserToProjectController};
+const getProjectController = async (req: Request, res: Response):Promise<void> => {
+    const {projectId} = req.params;
+    if (!projectId) {
+        res.status(400).json({error: "ProjectId is required"});
+        return;
+    }
+    try{
+        const project= await projectServices.getProject(projectId);
+        res.status(200).json(project);
+    } catch (err) {
+        console.log('Error',err)
+    }
+}
+
+export default {createProjectController, getAllProjectController, addUserToProjectController, getProjectController};

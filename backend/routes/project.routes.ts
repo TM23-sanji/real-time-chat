@@ -19,4 +19,6 @@ router.put('/add-user',authMiddleware.authUser,
     .custom((users)=>{return users.every((user:string)=>user.match(/^[0-9a-fA-F]{24}$/))}),//check if all users are valid mongo ids.
     projectController.addUserToProjectController);
 
+router.get('/get-project/:projectId',authMiddleware.authUser,projectController.getProjectController);
+
 export default router;
