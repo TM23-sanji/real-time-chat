@@ -10,20 +10,24 @@ import {
   Grid,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AddProjectModal from "./AddProjectModal";
 import ChatLayout from "./ChatLayout";
 import axios from "axios";
 import { useUserContext } from "../context/use.user.context";
 import { useNavigate } from "react-router-dom";
+import {gsap} from "gsap";
 
-interface ProjectData {
+export interface ProjectData {
   name: string;
   users: string[];
 }
 
 const Dashboard = () => {
   const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Partial<ProjectData> | null>(null);
+  const navbarRef= useRef(null);
+  const addbtnRef = useRef<HTMLButtonElement>(null);  
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -46,8 +50,36 @@ const Dashboard = () => {
     fetchProjects();
   }, []);
 
-  const [selectedProject, setSelectedProject] =
-    useState<Partial<ProjectData> | null>(null);
+  useEffect(()=>{
+    if (selectedProject){
+      gsap.to(navbarRef.current,{
+        duration:0.5,
+        opacity:0,
+        y:-100,
+        // display:'none'
+      });
+      gsap.to(addbtnRef.current,{
+        duration:0.5,
+        opacity:0,
+        y:-100,
+        // display:'none'
+      });
+    } else {
+      gsap.to(navbarRef.current,{
+        duration:0.5,
+        opacity:1,
+        y:0,
+        // display:'block'
+      });
+      gsap.to(addbtnRef.current,{
+        duration:0.5,
+        opacity:1,
+        y:0,
+        // display:'block'
+      });
+    }
+  },[selectedProject])
+
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
@@ -68,16 +100,16 @@ const Dashboard = () => {
   return (
     <Box>
       {/* Top App Bar */}
-      <AppBar position="static" sx={{ mb: 4 }}>
+      <AppBar ref={navbarRef} position="static" sx={{ mb: 4, backgroundColor:'transparent', color:'black' }}>
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            My Projects
+          <Typography variant="h5" sx={{ flexGrow: 1, fontWeight:700 }}>
+            Projects
           </Typography>
           <IconButton onClick={handleAvatarClick}>
             <Avatar alt="User" />
           </IconButton>
           <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
-            <MenuItem
+            <MenuItem sx={{fontWeight:700}}
               onClick={async () => {
                 try {
                   const response = await axios.post(
@@ -153,13 +185,13 @@ const Dashboard = () => {
         </Grid>
       ) : (
         <ChatLayout
-          projectName={selectedProject?.name || ""}
+          project={selectedProject as ProjectData}
           onBack={() => setSelectedProject(null)}
         />
       )}
 
       {/* Floating Add Project Button */}
-      <AddProjectModal onAdd={handleAddProject} />
+      <AddProjectModal onAdd={handleAddProject} addbtnRef={addbtnRef}/>
     </Box>
   );
 };

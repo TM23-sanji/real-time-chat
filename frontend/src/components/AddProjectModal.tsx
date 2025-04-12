@@ -28,9 +28,10 @@ const style = {
 
 interface Props {
   onAdd: (name: string) => void;
+  addbtnRef:React.RefObject<HTMLButtonElement | null>;
 }
 
-const AddProjectModal: React.FC<Props> = ({onAdd}) => {
+const AddProjectModal: React.FC<Props> = ({onAdd,addbtnRef}) => {
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
 
@@ -97,6 +98,7 @@ const AddProjectModal: React.FC<Props> = ({onAdd}) => {
         aria-label="add"
         onClick={handleOpen}
         sx={{ position: "fixed", bottom: 20, right: 20 }}
+        ref={addbtnRef}
       >
         <AddIcon />
       </Fab>
