@@ -5,6 +5,7 @@ import axios from "axios";
 interface Props {
   project: ProjectData;
   onBack: () => void;
+  fetchProjects: () => void;
 }
 
 interface User {
@@ -36,7 +37,7 @@ import SendIcon from "@mui/icons-material/Send";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect, useRef } from "react";
 
-const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
+const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
@@ -219,7 +220,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
         </Box>
 
         <Box sx={{ p: 2 }}>
-          <Button variant="outlined" onClick={onBack}>
+          <Button variant="outlined" onClick={()=>{onBack(); fetchProjects();}}>
             🔙 Back
           </Button>
         </Box>
@@ -317,13 +318,15 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
       <Button onClick={() => {setInviteModalOpen(false); setSelectedUsers([])}}>Cancel</Button>
       <Button
         variant="contained"
-        onClick={() => {
+        onClick={async() => {
           // Do something with selectedUsers
           console.log('Invited:', selectedUsers);
+          await axios.put(`${import.meta.env.VITE_BASE_URL}/projects/add-user`,
+            {projectName:project.name,userNames:selectedUsers}).then(()=>console.log('Done')).catch((err)=>console.log(err)).finally(()=>{
           setNotAvailableUsers((prev) => [...prev, ...selectedUsers]);
           setSelectedUsers([]);
           setAvailableUsers((prev) => prev.filter((user) => !selectedUsers.includes(user)));
-          setInviteModalOpen(false);
+          setInviteModalOpen(false);})
         }}
       >
         Invite

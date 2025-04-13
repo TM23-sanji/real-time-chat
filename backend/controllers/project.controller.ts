@@ -3,6 +3,7 @@ import projectModel from "../models/project.model";
 import { Request, Response } from "express";
 import {validationResult} from "express-validator";
 import mongoose from "mongoose";
+import userModel from "../models/user.model";
 
 const createProjectController = async (req: Request, res: Response):Promise<void> => {
     const errors= validationResult(req);
@@ -44,16 +45,19 @@ const addUserToProjectController = async (req: Request, res: Response):Promise<v
     }
 
     try {
-        const {projectId,users}=req.body;
-        if (!projectId || !users) {
-            res.status(400).json({error: "ProjectId and users are required"});
+        const {projectName,userNames}=req.body;
+        if (!projectName || !userNames) {
+            res.status(400).json({error: "ProjectName and userNames are required"});
             return;
         }
-        if (!mongoose.Types.ObjectId.isValid(projectId)) {
-            res.status(400).json({error: "Invalid ProjectId"});
-            return;
-        }
-        const project = await projectModel.findByIdAndUpdate(projectId,{$push:{users:{$each:users}}},{new:true});
+        const users = await Promise.all(userNames.map(async (userName: string) => {
+            const user = await userModel.findOne({name:userName});
+            if (!user) {
+                throw new Error(`User ${userName} not found`);
+            }
+            return user._id;
+        }));
+        const project = await projectModel.findOneAndUpdate({name:projectName},{$push:{users:{$each:users}}},{new:true});
         res.status(200).json(project);
 
     } catch (err) {

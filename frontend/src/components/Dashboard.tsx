@@ -29,23 +29,22 @@ const Dashboard = () => {
   const navbarRef= useRef(null);
   const addbtnRef = useRef<HTMLButtonElement>(null);  
 
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/projects/all`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setProjects(response.data);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/projects/all`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        setProjects(response.data);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
-
     fetchProjects();
   }, []);
 
@@ -190,6 +189,7 @@ const Dashboard = () => {
         <ChatLayout
           project={selectedProject as ProjectData}
           onBack={() => setSelectedProject(null)}
+          fetchProjects={fetchProjects}
         />
       )}
 

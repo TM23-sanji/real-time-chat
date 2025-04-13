@@ -13,10 +13,9 @@ router.post('/create',
 
 router.get('/all',authMiddleware.authUser,projectController.getAllProjectController);
 
-router.put('/add-user',authMiddleware.authUser,
-    body('projectId').isString().withMessage('ProjectId is required').bail(),
-    body('users').isArray({min:1}).withMessage('Users must be an array of at least 1 user').bail()
-    .custom((users)=>{return users.every((user:string)=>user.match(/^[0-9a-fA-F]{24}$/))}),//check if all users are valid mongo ids.
+router.put('/add-user',
+    body('projectName').isString().withMessage('ProjectName is required').bail(),
+    body('userNames').isArray({min:1}).withMessage('UserNames must be an array of at least 1 user').bail(),
     projectController.addUserToProjectController);
 
 router.get('/get-project/:projectId',authMiddleware.authUser,projectController.getProjectController);
