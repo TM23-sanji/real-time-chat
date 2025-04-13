@@ -27,4 +27,6 @@ router.post('/available-users',
     .custom((users)=>{return users.every((user:string)=>user.match(/^[0-9a-fA-F]{24}$/))}),//check if all users are valid mongo ids.
     authMiddleware.authUser,userController.getAvailableUsersController);
 
+router.post('/not-available-users',authMiddleware.authUser,userController.getNotAvailableUsersController);
+
 export default router;

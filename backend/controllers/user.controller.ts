@@ -102,5 +102,18 @@ const getAvailableUsersController=async (req:Request,res:Response):Promise<void>
         res.status(500).send("Internal Server Error");
     }
 }
+const getNotAvailableUsersController=async (req:Request,res:Response):Promise<void>=>{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const {users}=req.body;
+        const notAvailableUsers = await userModel.find({_id:{$in:users}});//include the users that are already in the project.
+        res.status(200).json(notAvailableUsers);
+    } catch (err){
+        res.status(500).send("Internal Server Error");
+    }
+}
 
-export default { createUserController, loginUserController, profileController, logoutController, getAllUsersController, getAvailableUsersController };
+export default { createUserController, loginUserController, profileController, logoutController, getAllUsersController, getAvailableUsersController,getNotAvailableUsersController };

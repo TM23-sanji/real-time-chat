@@ -43,6 +43,17 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+  const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
+
+  const hasRun = useRef(false);
+
+  useEffect(()=>{
+    if (!hasRun.current){
+      fetchAvailableUsers();
+      fetchNotAvailableUsers();
+      hasRun.current=true;
+    }
+  },)
 
   const chatRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,6 +88,26 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
         const users= response.data;
         users.map((user:User)=>{
           setAvailableUsers((prev) => [...prev, user.name])
+        })
+      } catch (error) {
+        console.error("Error fetching available users:", error);
+      }
+    };
+    
+  const fetchNotAvailableUsers = async () => {
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/users/not-available-users`,
+          { users: project.users },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const users= response.data;
+        users.map((user:User)=>{
+          setNotAvailableUsers((prev) => [...prev, user.name])
         })
       } catch (error) {
         console.error("Error fetching available users:", error);
@@ -132,7 +163,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
           </Tooltip>
 
           <Tooltip title="Add">
-            <IconButton onClick={() => {setInviteModalOpen(true); if(availableUsers.length===0) fetchAvailableUsers()}}>
+            <IconButton onClick={() => setInviteModalOpen(true)}>
               <AddIcon />
             </IconButton>
           </Tooltip>
@@ -237,7 +268,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
         </Box>
         <Divider sx={{ my: 2 }} />
         <List>
-          {["Ravi", "Simran", "Kabir", "Ayesha"].map((user, index) => (
+          {notAvailableUsers.map((user, index) => (
             <ListItem key={index}>
               <ListItemText primary={user} />
             </ListItem>
@@ -283,12 +314,15 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
     </Box>
 
     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-      <Button onClick={() => setInviteModalOpen(false)}>Cancel</Button>
+      <Button onClick={() => {setInviteModalOpen(false); setSelectedUsers([])}}>Cancel</Button>
       <Button
         variant="contained"
         onClick={() => {
           // Do something with selectedUsers
           console.log('Invited:', selectedUsers);
+          setNotAvailableUsers((prev) => [...prev, ...selectedUsers]);
+          setSelectedUsers([]);
+          setAvailableUsers((prev) => prev.filter((user) => !selectedUsers.includes(user)));
           setInviteModalOpen(false);
         }}
       >

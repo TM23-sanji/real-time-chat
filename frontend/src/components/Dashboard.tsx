@@ -41,7 +41,6 @@ const Dashboard = () => {
           }
         );
         setProjects(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching projects:", error);
       }
