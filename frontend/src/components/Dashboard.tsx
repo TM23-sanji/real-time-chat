@@ -53,29 +53,33 @@ const Dashboard = () => {
   useEffect(()=>{
     if (selectedProject){
       gsap.to(navbarRef.current,{
-        duration:0.5,
-        opacity:0,
+        duration:1,
+        // opacity:0,
         y:-100,
-        // display:'none'
+        // display:'none',
+        position:'absolute',
+        ease: "power2.out",
       });
       gsap.to(addbtnRef.current,{
         duration:0.5,
         opacity:0,
         y:-100,
-        // display:'none'
+        display:'none'
       });
     } else {
       gsap.to(navbarRef.current,{
-        duration:0.5,
-        opacity:1,
+        duration:1,
+        // opacity:1,
         y:0,
-        // display:'block'
+        display:'block',
+        position:'relative',
+        ease: "power2.out",
       });
       gsap.to(addbtnRef.current,{
         duration:0.5,
         opacity:1,
         y:0,
-        // display:'block'
+        display:'block'
       });
     }
   },[selectedProject])
@@ -144,7 +148,7 @@ const Dashboard = () => {
       {!selectedProject ? (
         <Grid container spacing={4} px={4}>
           {projects.map((project, index) => (
-            <Grid
+            <Grid 
               key={index}
               sx={{
                 gridColumn: {
