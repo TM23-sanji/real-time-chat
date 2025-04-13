@@ -89,4 +89,18 @@ const getAllUsersController=async (req:Request,res:Response):Promise<void>=>{
     }
 }
 
-export default { createUserController, loginUserController, profileController, logoutController, getAllUsersController };
+const getAvailableUsersController=async (req:Request,res:Response):Promise<void>=>{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const {users}=req.body;
+        const availableUsers = await userModel.find({_id:{$nin:users}});//exclude the users that are already in the project.
+        res.status(200).json(availableUsers);
+    } catch (err){
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+export default { createUserController, loginUserController, profileController, logoutController, getAllUsersController, getAvailableUsersController };

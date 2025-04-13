@@ -22,4 +22,9 @@ router.post('/logout', authMiddleware.authUser,userController.logoutController);
 
 router.get('/all',authMiddleware.authUser,userController.getAllUsersController);
 
+router.post('/available-users',
+    body('users').isArray({min:1}).withMessage('Users must be an array of at least 1 user').bail()
+    .custom((users)=>{return users.every((user:string)=>user.match(/^[0-9a-fA-F]{24}$/))}),//check if all users are valid mongo ids.
+    authMiddleware.authUser,userController.getAvailableUsersController);
+
 export default router;

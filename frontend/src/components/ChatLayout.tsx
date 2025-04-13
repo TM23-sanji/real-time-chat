@@ -1,9 +1,16 @@
 import { ProjectData } from "./Dashboard";
 import React from "react";
+import axios from "axios";
 
 interface Props {
   project: ProjectData;
   onBack: () => void;
+}
+
+interface User {
+    name: string;
+    email: string;
+    _id: string;
 }
 
 import {
@@ -18,18 +25,25 @@ import {
   Divider,
   Tooltip,
   TextField,
+  Modal,
+  Checkbox,
+  ListItemIcon,
+  MenuItem,
 } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
+import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect, useRef } from "react";
 
 const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newMessage, setNewMessage] = useState("");
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
-    []
-  );
+  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+
   const chatRef = useRef<HTMLDivElement | null>(null);
 
   const toggleDrawer = (open: boolean) => {
@@ -48,6 +62,26 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
       handleSend();
     }
   };
+
+  const fetchAvailableUsers = async () => {
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/users/available-users`,
+          { users: project.users },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const users= response.data;
+        users.map((user:User)=>{
+          setAvailableUsers((prev) => [...prev, user.name])
+        })
+      } catch (error) {
+        console.error("Error fetching available users:", error);
+      }
+    };
 
   useEffect(() => {
     chatRef.current?.scrollTo({
@@ -90,11 +124,19 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
           >
             {project.name}
           </Typography>
+          <Box>
           <Tooltip title="Users">
             <IconButton onClick={() => toggleDrawer(true)}>
               <PeopleIcon />
             </IconButton>
           </Tooltip>
+
+          <Tooltip title="Add">
+            <IconButton onClick={() => {setInviteModalOpen(true); if(availableUsers.length===0) fetchAvailableUsers()}}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+          </Box>
         </Box>
 
         <Box
@@ -202,7 +244,62 @@ const ChatLayout: React.FC<Props> = ({ project, onBack }) => {
           ))}
         </List>
       </Drawer>
+
+      <Modal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)}>
+  <Box
+    sx={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 400,
+      bgcolor: 'background.paper',
+      borderRadius: 2,
+      boxShadow: 24,
+      p: 3,
+    }}
+  >
+    <Typography variant="h6" mb={2} sx={{fontWeight:"bold"}}>
+      Invite Users to Project
+    </Typography>
+    <Box sx={{ maxHeight: 200, overflowY: 'auto', mb: 2 }}>
+      {availableUsers.map((user) => (
+        <MenuItem
+          key={user}
+          onClick={() => {
+            setSelectedUsers((prev) =>
+              prev.includes(user)
+                ? prev.filter((u) => u !== user)
+                : [...prev, user]
+            );
+          }}
+        >
+          <ListItemIcon>
+            <Checkbox edge="start" checked={selectedUsers.includes(user)} />
+          </ListItemIcon>
+          <ListItemText primary={user} />
+        </MenuItem>
+      ))}
     </Box>
+
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+      <Button onClick={() => setInviteModalOpen(false)}>Cancel</Button>
+      <Button
+        variant="contained"
+        onClick={() => {
+          // Do something with selectedUsers
+          console.log('Invited:', selectedUsers);
+          setInviteModalOpen(false);
+        }}
+      >
+        Invite
+      </Button>
+    </Box>
+  </Box>
+</Modal>
+
+    </Box>
+    
   );
 };
 
