@@ -76,6 +76,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   };
 
   const fetchAvailableUsers = async () => {
+    console.log(project)
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/users/available-users`,

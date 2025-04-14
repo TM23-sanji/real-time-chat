@@ -90,10 +90,15 @@ const Dashboard = () => {
   };
   const handleMenuClose = () => setAnchorEl(null);
 
-  const handleAddProject = (name: string) => {
+  const handleAddProject = async(name: string) => {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/users/profile`,{
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
     setProjects((prev) => [
       ...prev,
-      { name: name || "Project Inc", users: [projects[0]?.users[0]] },
+      { name: name || "Project Inc", users: [response.data.id] },
     ]);
   };
   const { setUser } = useUserContext();
