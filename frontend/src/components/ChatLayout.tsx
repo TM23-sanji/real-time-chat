@@ -36,8 +36,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect, useRef } from "react";
+import { receiveMsg, sendMsg } from "../socket";
+import { useUserContext } from "../context/use.user.context";
 
 const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
+  const {user} = useUserContext();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
@@ -47,6 +50,12 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
 
   const hasRun = useRef(false);
+
+  useEffect(() => {
+    receiveMsg('chat message', (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+  }, []);
 
   useEffect(()=>{
     if (!hasRun.current){
@@ -64,7 +73,8 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
 
   const handleSend = () => {
     if (newMessage.trim()) {
-      setMessages([...messages, { sender: "You", text: newMessage }]);
+      sendMsg('chat message', { sender: user?.name|| " ", text: newMessage });
+      setMessages([...messages, { sender: user?.name|| " ", text: newMessage }]);
       setNewMessage("");
     }
   };
@@ -191,15 +201,16 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
             <Box
               key={idx}
               sx={{
-                alignSelf: msg.sender === "You" ? "flex-end" : "flex-start",
-                bgcolor: msg.sender === "You" ? "#1976d2" : "#eee",
-                color: msg.sender === "You" ? "white" : "black",
+                alignSelf: msg.sender === user?.name ? "flex-end" : "flex-start",
+                bgcolor: msg.sender === user?.name ? "#1976d2" : "#eee",
+                color: msg.sender === user?.name ? "white" : "black",
                 px: 2,
                 py: 1,
                 borderRadius: 2,
                 maxWidth: "80%",
               }}
             >
+              <Typography variant="caption">{msg.sender} :</Typography>
               <Typography variant="body2">{msg.text}</Typography>
             </Box>
           ))}

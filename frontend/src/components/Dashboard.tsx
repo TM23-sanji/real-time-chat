@@ -17,7 +17,7 @@ import axios from "axios";
 import { useUserContext } from "../context/use.user.context";
 import { useNavigate } from "react-router-dom";
 import {gsap} from "gsap";
-
+import { initializeSocket } from "../socket";
 export interface ProjectData {
   name: string;
   users: string[];
@@ -162,7 +162,8 @@ const Dashboard = () => {
               }}
             >
               <Box
-                onClick={() => setSelectedProject(project)}
+                onClick={() => {setSelectedProject(project); initializeSocket(project.name);
+                }}
                 sx={{
                   p: 3,
                   bgcolor: "#f5f5f5",
