@@ -4,6 +4,7 @@ import connect from "./db/db";
 import userRoutes from "./routes/user.routes";
 import projectRoutes from "./routes/project.routes";
 import cookieParser from "cookie-parser";
+import aiRoutes from "./routes/ai.routes";
 connect();
 
 const app =express();
@@ -17,4 +18,5 @@ app.get('/',(req:Request,res:Response)=>{
 });
 app.use('/users',userRoutes);
 app.use('/projects',projectRoutes);
+app.use('/ai',aiRoutes);
 export default app;
