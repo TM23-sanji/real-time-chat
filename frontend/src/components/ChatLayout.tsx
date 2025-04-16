@@ -38,6 +38,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect, useRef } from "react";
 import { receiveMsg, sendMsg } from "../socket";
 import { useUserContext } from "../context/use.user.context";
+import AiResponse from "./AiResponse";
 
 const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const {user} = useUserContext();
@@ -48,6 +49,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
+  const [aiMessage, setAiMessage] = useState<string>("Type @ai then your message to get AI response");
 
   const hasRun = useRef(false);
 
@@ -71,10 +73,23 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
     setOpenDrawer(open);
   };
 
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      sendMsg('chat message', { sender: user?.name|| " ", text: newMessage });
-      setMessages([...messages, { sender: user?.name|| " ", text: newMessage }]);
+  const handleSend = async () => {
+    if (newMessage.trim().toLowerCase().startsWith("@ai")){
+      setAiMessage("Loading...");
+      setMessages([...messages,{sender: user?.name|| " ",text:newMessage.trim()}]);
+      setNewMessage("");     
+
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/ai/get-result?prompt=${newMessage.trim().split(/\s+/).slice(1).join(" ")}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setAiMessage(response.data);
+
+    } else {
+      sendMsg('chat message', { sender: user?.name|| " ", text: newMessage.trim() });
+      setMessages([...messages, { sender: user?.name|| " ", text: newMessage.trim() }]);
       setNewMessage("");
     }
   };
@@ -240,21 +255,30 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
 
       {/* Right AI Response Panel (65%) */}
       <Box
-        sx={{
-          width: "75%",
-          p: 3,
-          bgcolor: "#fff",
-        }}
-      >
-        <Typography variant="h5" mb={2}>
-          🤖
-        </Typography>
-        <Box sx={{ bgcolor: "#f1f1f1", p: 2, borderRadius: 2, height: "80%" }}>
-          <Typography color="text.secondary">
-            AI responses or output will be displayed here.
-          </Typography>
-        </Box>
-      </Box>
+  sx={{
+    width: "75%",
+    p: 3,
+    bgcolor: "#fff",
+    display: "flex",
+    flexDirection: "column",
+  }}
+>
+  <Typography variant="h5" mb={2}>
+    🤖 Gemini AI
+  </Typography>
+
+  <Box
+    sx={{
+      bgcolor: "#f1f1f1",
+      p: 2,
+      borderRadius: 2,
+      flexGrow: 1,
+      overflowY: "auto",
+    }}
+  >
+    <AiResponse content={aiMessage} />
+  </Box>
+</Box>
 
       {/* Slide-In Drawer from Right (User List) */}
       <Drawer
