@@ -76,7 +76,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const handleSend = async () => {
     if (newMessage.trim().toLowerCase().startsWith("@ai")){
       setAiMessage("Loading...");
-      setMessages([...messages,{sender: user?.name|| " ",text:newMessage.trim()}]);
+      setMessages(prev => [...prev, { sender: user?.name || " ", text: newMessage.trim() }]);
       setNewMessage("");     
 
       const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/ai/get-result?prompt=${newMessage.trim().split(/\s+/).slice(1).join(" ")}`,
@@ -89,19 +89,19 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
 
     } else {
       sendMsg('chat message', { sender: user?.name|| " ", text: newMessage.trim() });
-      setMessages([...messages, { sender: user?.name|| " ", text: newMessage.trim() }]);
+      setMessages(prev => [...prev, { sender: user?.name || " ", text: newMessage.trim() }]);
       setNewMessage("");
     }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
+      event.preventDefault();
       handleSend();
     }
   };
 
   const fetchAvailableUsers = async () => {
-    console.log(project)
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/users/available-users`,

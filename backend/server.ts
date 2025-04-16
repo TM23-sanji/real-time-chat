@@ -75,7 +75,6 @@ io.on('connection', socket => {
     console.log('a user connected')
     socket.join(socket.project?.name as string);
     socket.on('chat message',(msg)=>{
-        console.log(msg)
         socket.broadcast.to(socket.project?.name as string).emit('chat message', msg);
     })
     socket.on('disconnect', () => {
