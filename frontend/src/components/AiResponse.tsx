@@ -1,59 +1,81 @@
-import React from "react";
-import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Box } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography, Button, Paper } from "@mui/material";
 
-interface AIResponseProps {
-  content: string;
+interface FileTreeContent {
+  [key: string]: {
+    content: string;
+  };
 }
 
-const AiResponse: React.FC<AIResponseProps> = ({ content }) => {
-    return (
+interface AiResponseProps {
+  content: {
+    text: string;
+    fileTree: FileTreeContent;
+  };
+}
+
+const AiResponse: React.FC<AiResponseProps> = ({ content }) => {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  const fileNames = Object.keys(content?.fileTree || {});
+
+  return (
+    <Box sx={{ display: "flex", height: "100%", gap: 2 }}>
+      {/* Sidebar Buttons */}
       <Box
         sx={{
-          bgcolor: "#f9f9f9",
+          width: "180px",
+          bgcolor: "#f4f4f4",
           p: 2,
-          borderRadius: 2,
-          overflowY: "auto",
-          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          borderRight: "1px solid #ddd",
         }}
       >
-        <ReactMarkdown
-          children={content}
-          components={{
-            code({ inline, children, ...props }: { inline?: boolean; children?: React.ReactNode }) {
-            return !inline ? (
-                <Box
-                  component="div"
-                  sx={{
-                    my: 2,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    border: "1px solid #ccc",
-                  }}
-                >
-                  <SyntaxHighlighter
-                    language="javascript"
-                    style={materialDark}
-                    customStyle={{ margin: 0, padding: "1rem", background: "#282c34" }}
-                    PreTag="div"
-                    {...props}
-                  >
-                    {String(children).replace(/\n$/, "")}
-                  </SyntaxHighlighter>
-                </Box>
-              ) : (
-                <code style={{ backgroundColor: "#e0e0e0", padding: "2px 6px", borderRadius: 4 }}>
-                  {children}
-                </code>
-              );
-            },
-          }}
-        />
+        <Typography variant="subtitle1" fontWeight="bold" mb={1}>
+          📁 Files
+        </Typography>
+        {fileNames.map((fileName) => (
+          <Button
+            key={fileName}
+            variant={selectedFile === fileName ? "contained" : "outlined"}
+            onClick={() => setSelectedFile(fileName)}
+            size="small"
+            sx={{ justifyContent: "flex-start", textTransform: "none", overflow:"hidden" }}
+          >
+            {fileName}
+          </Button>
+        ))}
       </Box>
-    );
-  };
-  
-  export default AiResponse;
-  
+
+      {/* File Content Display */}
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600}>
+          {selectedFile || "Select a file"}
+        </Typography>
+        <Paper
+          sx={{
+            p: 2,
+            bgcolor: "#f9f9f9",
+            whiteSpace: "pre-wrap",
+            fontFamily: "monospace",
+            flex: 1,
+            overflowX: "auto",
+          }}
+        >
+          {selectedFile
+            ? content.fileTree[selectedFile]?.content || "No content"
+            : "Click on a file to view its content."}
+        </Paper>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            {content.text}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default AiResponse;

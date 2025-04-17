@@ -49,7 +49,8 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
-  const [aiMessage, setAiMessage] = useState<string>("Type @ai then your message to get AI response");
+  const [aiMessage, setAiMessage] = useState<{ text: string; fileTree: any } | null>(null);
+
 
   const hasRun = useRef(false);
 
@@ -75,7 +76,6 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
 
   const handleSend = async () => {
     if (newMessage.trim().toLowerCase().startsWith("@ai")){
-      setAiMessage("Loading...");
       setMessages(prev => [...prev, { sender: user?.name || " ", text: newMessage.trim() }]);
       setNewMessage("");     
 
@@ -85,7 +85,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setAiMessage(response.data);
+      setAiMessage(JSON.parse(response.data));
 
     } else {
       sendMsg('chat message', { sender: user?.name|| " ", text: newMessage.trim() });
@@ -276,7 +276,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
       overflowY: "auto",
     }}
   >
-    <AiResponse content={aiMessage} />
+    <AiResponse content={aiMessage || { text: "Type @ai to get AI response", fileTree: {} }} />
   </Box>
 </Box>
 
