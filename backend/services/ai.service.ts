@@ -57,6 +57,24 @@ Output: {
 "text":"Hello! How can I help you today?"
 }
 
+Example 3:
+Input: Write a JS function for fibbonacci sequence.
+Output:{
+"text":"Here is a JavaScript function to generate the Fibonacci sequence:",
+"fileTree":{
+"fibonacci.js":{
+content: "
+function fibonacci(n) {
+if (n <= 1) {
+return n;
+}
+return fibonacci(n - 1) + fibonacci(n - 2);
+}
+"
+}
+}
+}
+
 Now respond to the following:
 Input: ${prompt}
 Output:

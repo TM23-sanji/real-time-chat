@@ -4,20 +4,38 @@ import { Box, Typography, Button, Paper } from "@mui/material";
 interface FileTreeContent {
   [key: string]: {
     content: string;
-  };
+  } ;
 }
 
-interface AiResponseProps {
+export interface AiResponseProps {
   content: {
     text: string;
     fileTree: FileTreeContent;
   };
+  viewMode: "chat" | "code";
 }
 
-const AiResponse: React.FC<AiResponseProps> = ({ content }) => {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+const AiResponse: React.FC<AiResponseProps> = ({ content, viewMode }) => {
+  const hasFiles = content?.fileTree && Object.keys(content.fileTree).length > 0;
+  const [selectedFile, setSelectedFile] = useState<string | null>(
+    hasFiles ? Object.keys(content.fileTree!)[0] : null
+  );
 
-  const fileNames = Object.keys(content?.fileTree || {});
+  if (viewMode === "chat") {
+    return (
+      <Typography sx={{ whiteSpace: "pre-wrap",fontFamily:"monospace", fontSize: "1rem" }}>
+        {content?.text || "No chat response available."}
+      </Typography>
+    );
+  }
+
+  if (!hasFiles) {
+    return (
+      <Typography sx={{ whiteSpace: "pre-wrap", fontFamily:"monospace", fontSize: "1rem" }}>
+        {content?.text || "No content available."}
+      </Typography>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", height: "100%", gap: 2 }}>
@@ -36,7 +54,7 @@ const AiResponse: React.FC<AiResponseProps> = ({ content }) => {
         <Typography variant="subtitle1" fontWeight="bold" mb={1}>
           📁 Files
         </Typography>
-        {fileNames.map((fileName) => (
+        {Object.keys(content.fileTree!).map((fileName) => (
           <Button
             key={fileName}
             variant={selectedFile === fileName ? "contained" : "outlined"}
@@ -52,7 +70,7 @@ const AiResponse: React.FC<AiResponseProps> = ({ content }) => {
       {/* File Content Display */}
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
         <Typography variant="subtitle1" fontWeight={600}>
-          {selectedFile || "Select a file"}
+          {selectedFile}
         </Typography>
         <Paper
           sx={{
@@ -65,17 +83,13 @@ const AiResponse: React.FC<AiResponseProps> = ({ content }) => {
           }}
         >
           {selectedFile
-            ? content.fileTree[selectedFile]?.content || "No content"
+            ? content.fileTree?.[selectedFile]?.content || "No content"
             : "Click on a file to view its content."}
         </Paper>
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            {content.text}
-          </Typography>
-        </Box>
       </Box>
     </Box>
   );
+
 };
 
 export default AiResponse;

@@ -15,6 +15,8 @@ interface User {
 }
 
 import {
+  ToggleButtonGroup,
+  ToggleButton,
   Box,
   Button,
   Typography,
@@ -38,7 +40,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect, useRef } from "react";
 import { receiveMsg, sendMsg } from "../socket";
 import { useUserContext } from "../context/use.user.context";
-import AiResponse from "./AiResponse";
+import AiResponse, { AiResponseProps } from "./AiResponse";
 
 const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const {user} = useUserContext();
@@ -49,8 +51,13 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
-  const [aiMessage, setAiMessage] = useState<{ text: string; fileTree: any } | null>(null);
 
+  const [aiMessage, setAiMessage] = useState<AiResponseProps | null>(null);
+  const [viewMode, setViewMode] = useState<"code"|"chat">("code")
+
+  const handleModeChange=(_: React.MouseEvent<HTMLElement>, newMode:"code"|"chat")=>{
+      setViewMode(newMode??"chat");
+  }
 
   const hasRun = useRef(false);
 
@@ -263,22 +270,39 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
     flexDirection: "column",
   }}
 >
-  <Typography variant="h5" mb={2}>
-    🤖 Gemini AI
-  </Typography>
+       <Box
+        sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      >
+        <Typography variant="h5">🤖 Gemini AI</Typography>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleModeChange}
+          size="small"
+        >
+          <ToggleButton value="chat">Chat</ToggleButton>
+          <ToggleButton value="code">Code</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
-  <Box
-    sx={{
-      bgcolor: "#f1f1f1",
-      p: 2,
-      borderRadius: 2,
-      flexGrow: 1,
-      overflowY: "auto",
-    }}
-  >
-    <AiResponse content={aiMessage || { text: "Type @ai to get AI response", fileTree: {} }} />
-  </Box>
-</Box>
+      <Box
+        sx={{
+          bgcolor: "#f1f1f1",
+          p: 2,
+          borderRadius: 2,
+          flexGrow: 1,
+          overflowY: "auto",
+        }}
+      >
+        <AiResponse
+          content={
+            aiMessage || { text: "Type @ai to get AI response", fileTree: {} }
+          }
+          viewMode={viewMode}
+        />
+      </Box>
+    </Box>
+
 
       {/* Slide-In Drawer from Right (User List) */}
       <Drawer
