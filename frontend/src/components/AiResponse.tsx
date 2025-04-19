@@ -1,30 +1,31 @@
 import React, { useState } from "react";
 import { Box, Typography, Button, Paper } from "@mui/material";
 
-interface FileTreeContent {
+export interface FileTreeContent {
   [key: string]: {
-    content: string;
+    file: { contents: string };
   } ;
 }
 
 export interface AiResponseProps {
-  content: {
     text: string;
     fileTree: FileTreeContent;
-  };
-  viewMode: "chat" | "code";
+    buildCommand?: { mainItem: string; commands: string[] };
+    startCommand?: { mainItem: string; commands: string[] };
+    additionalExplanation?: string;
+    viewMode: "chat" | "code";
 }
 
-const AiResponse: React.FC<AiResponseProps> = ({ content, viewMode }) => {
-  const hasFiles = content?.fileTree && Object.keys(content.fileTree).length > 0;
+const AiResponse: React.FC<AiResponseProps> = ({ text, fileTree, additionalExplanation, viewMode }) => {
+  const hasFiles = fileTree && Object.keys(fileTree).length > 0;
   const [selectedFile, setSelectedFile] = useState<string | null>(
-    hasFiles ? Object.keys(content.fileTree!)[0] : null
+    hasFiles ? Object.keys(fileTree!)[0] : null
   );
 
   if (viewMode === "chat") {
     return (
       <Typography sx={{ whiteSpace: "pre-wrap",fontFamily:"monospace", fontSize: "1rem" }}>
-        {content?.text || "No chat response available."}
+        {`${text}\n${additionalExplanation || " "}`}
       </Typography>
     );
   }
@@ -32,7 +33,7 @@ const AiResponse: React.FC<AiResponseProps> = ({ content, viewMode }) => {
   if (!hasFiles) {
     return (
       <Typography sx={{ whiteSpace: "pre-wrap", fontFamily:"monospace", fontSize: "1rem" }}>
-        {content?.text || "No content available."}
+        {text || "No content available."}
       </Typography>
     );
   }
@@ -54,7 +55,7 @@ const AiResponse: React.FC<AiResponseProps> = ({ content, viewMode }) => {
         <Typography variant="subtitle1" fontWeight="bold" mb={1}>
           📁 Files
         </Typography>
-        {Object.keys(content.fileTree!).map((fileName) => (
+        {Object.keys(fileTree!).map((fileName) => (
           <Button
             key={fileName}
             variant={selectedFile === fileName ? "contained" : "outlined"}
@@ -83,7 +84,7 @@ const AiResponse: React.FC<AiResponseProps> = ({ content, viewMode }) => {
           }}
         >
           {selectedFile
-            ? content.fileTree?.[selectedFile]?.content || "No content"
+            ? fileTree?.[selectedFile]?.file?.contents || "No content"
             : "Click on a file to view its content."}
         </Paper>
       </Box>

@@ -18,6 +18,9 @@ import { useUserContext } from "../context/use.user.context";
 import { useNavigate } from "react-router-dom";
 import {gsap} from "gsap";
 import { initializeSocket } from "../socket";
+import { WebContainer } from "@webcontainer/api";
+import { getWebContainer } from "../config/webContainer";
+
 export interface ProjectData {
   name: string;
   users: string[];
@@ -28,6 +31,7 @@ const Dashboard = () => {
   const [selectedProject, setSelectedProject] = useState<Partial<ProjectData> | null>(null);
   const navbarRef= useRef(null);
   const addbtnRef = useRef<HTMLButtonElement>(null);  
+  const [webContainer, setWebContainer] = useState<WebContainer|null>(null)
 
   const fetchProjects = async () => {
     try {
@@ -46,7 +50,17 @@ const Dashboard = () => {
   };
   useEffect(() => {
     fetchProjects();
+
   }, []);
+  
+  useEffect(()=>{
+    if(!webContainer){
+      getWebContainer().then((webContainer)=>{
+        setWebContainer(webContainer);
+        console.log("webContainer created");
+      })
+    }
+  },[])
 
   useEffect(()=>{
     if (selectedProject){
@@ -196,6 +210,7 @@ const Dashboard = () => {
           project={selectedProject as ProjectData}
           onBack={() => setSelectedProject(null)}
           fetchProjects={fetchProjects}
+          webContainer={webContainer}
         />
       )}
 

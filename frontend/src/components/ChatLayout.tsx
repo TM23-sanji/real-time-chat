@@ -6,6 +6,7 @@ interface Props {
   project: ProjectData;
   onBack: () => void;
   fetchProjects: () => void;
+  webContainer: WebContainer|null;
 }
 
 interface User {
@@ -41,8 +42,10 @@ import { useState, useEffect, useRef } from "react";
 import { receiveMsg, sendMsg } from "../socket";
 import { useUserContext } from "../context/use.user.context";
 import AiResponse, { AiResponseProps } from "./AiResponse";
+import { WebContainer } from "@webcontainer/api";
+import { FileTreeContent } from "./AiResponse";
 
-const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
+const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects, webContainer }) => {
   const {user} = useUserContext();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newMessage, setNewMessage] = useState("");
@@ -53,7 +56,14 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
 
   const [aiMessage, setAiMessage] = useState<AiResponseProps | null>(null);
-  const [viewMode, setViewMode] = useState<"code"|"chat">("code")
+  const [viewMode, setViewMode] = useState<"code"|"chat">("code");
+  
+  useEffect(()=>{
+    if (aiMessage?.fileTree){
+      webContainer?.mount(aiMessage.fileTree);
+      console.log("mounted")
+    }
+  },[aiMessage,webContainer])
 
   const handleModeChange=(_: React.MouseEvent<HTMLElement>, newMode:"code"|"chat")=>{
       setViewMode(newMode??"chat");
@@ -65,15 +75,12 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
     receiveMsg('chat message', (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
-  }, []);
-
-  useEffect(()=>{
     if (!hasRun.current){
       fetchAvailableUsers();
       fetchNotAvailableUsers();
       hasRun.current=true;
     }
-  },)
+  }, );
 
   const chatRef = useRef<HTMLDivElement | null>(null);
 
@@ -295,9 +302,11 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects }) => {
         }}
       >
         <AiResponse
-          content={
-            aiMessage || { text: "Type @ai to get AI response", fileTree: {} }
-          }
+          text={aiMessage?.text || "Type @ai to get AI response"}
+          fileTree={aiMessage?.fileTree || {} as FileTreeContent}
+          additionalExplanation={aiMessage?.additionalExplanation}
+          buildCommand={aiMessage?.buildCommand}
+          startCommand={aiMessage?.startCommand}
           viewMode={viewMode}
         />
       </Box>
