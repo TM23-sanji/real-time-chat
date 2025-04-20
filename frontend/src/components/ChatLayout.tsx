@@ -308,6 +308,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects, webContai
           buildCommand={aiMessage?.buildCommand}
           startCommand={aiMessage?.startCommand}
           viewMode={viewMode}
+          webContainer={webContainer}
         />
       </Box>
     </Box>

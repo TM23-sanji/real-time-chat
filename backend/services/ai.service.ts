@@ -80,6 +80,8 @@ return fibonacci(n - 1) + fibonacci(n - 2);
 }
 }
 
+IMPORTANT: Don't use file name likeroutes/index.js
+
 Now respond to the following:
 Input: ${prompt}
 Output:
@@ -97,5 +99,6 @@ Output:
       `,
     },
   });
+  console.log(response.text);
   return response.text;
 }
