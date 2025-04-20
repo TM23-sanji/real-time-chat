@@ -78,9 +78,10 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects, webContai
     if (!hasRun.current){
       fetchAvailableUsers();
       fetchNotAvailableUsers();
+      fetchChat();
       hasRun.current=true;
     }
-  }, );
+  }, []);
 
   const chatRef = useRef<HTMLDivElement | null>(null);
 
@@ -104,6 +105,7 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects, webContai
     } else {
       sendMsg('chat message', { sender: user?.name|| " ", text: newMessage.trim() });
       setMessages(prev => [...prev, { sender: user?.name || " ", text: newMessage.trim() }]);
+      sendChat();
       setNewMessage("");
     }
   };
@@ -154,6 +156,40 @@ const ChatLayout: React.FC<Props> = ({ project, onBack, fetchProjects, webContai
         console.error("Error fetching available users:", error);
       }
     };
+
+  const fetchChat = async () =>{
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/chat/all`,
+        {
+          headers:{
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          params: {
+            projectName: project.name,
+          },
+        }
+      );
+      response.data.map((msg: { sender: string; text: string }) => {
+        setMessages((prev) => [...prev, msg]);
+      });
+    }
+    catch (error) {
+      console.error("Error fetching chat:", error);
+    }
+  }
+
+  const sendChat = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/chat/create`,
+        { projectName: project.name, sender: user?.name, text: newMessage },
+      );
+    }
+    catch (err) {
+      console.error("Error sending chat:", err);
+    }
+  }
 
   useEffect(() => {
     chatRef.current?.scrollTo({

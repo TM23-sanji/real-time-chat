@@ -5,6 +5,7 @@ import userRoutes from "./routes/user.routes";
 import projectRoutes from "./routes/project.routes";
 import cookieParser from "cookie-parser";
 import aiRoutes from "./routes/ai.routes";
+import chatRoutes from "./routes/chat.routes";
 connect();
 
 const app =express();
@@ -19,4 +20,5 @@ app.get('/',(req:Request,res:Response)=>{
 app.use('/users',userRoutes);
 app.use('/projects',projectRoutes);
 app.use('/ai',aiRoutes);
+app.use('/chat',chatRoutes);
 export default app;
